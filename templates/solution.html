@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver - Step by Step Solution</title>
+    <style>
+        /* Your CSS styles here */
+        table {
+    border: 3px solid black;
+    border-collapse: collapse;
+}
+    tr {
+    padding: 0;
+}
+td {
+    width: 64px;
+    height: 64px;
+    padding: 0;
+    border: 1px solid gray;
+    text-align: center;
+    vertical-align: center;
+    font-size: 1.5em;
+}
+tr.box-bottom td {
+    border-bottom: 3px solid black;
+}
+
+td.box-side {
+    border-right: 3px solid black;
+}
+
+.initial-cell {
+    color: black; /* Change this color for initial cells */
+}
+
+.generated-cell {
+    color: grey; /* Change this color for generated cells */
+}
+
+/* to make lines between each 3rd cell bolded */
+td:nth-child(9n) {
+    border-right-width: 3px;
+}
+
+tr:nth-child(3n) td {
+    border-bottom-width: 3px;
+}
+    </style>
+</head>
+
+<body>
+    <h2>Current Puzzle State</h2>
+    <table>
+        <!-- Render the current state of the puzzle -->
+        {% for row in range(9) %}
+        <tr>
+            {% for col in range(9) %}
+                {% set var = 'C' ~ (row + 1) ~ (col + 1) %}
+                <script>
+                    console.log("Value of 'var':", "{{ var }}");
+                </script>
+                <script>
+                    console.log("Value of 'initial_assignments':", "{{ initial_assignments }}");
+                    console.log("Is '{{ var }}' in 'initial_assignments':", "{{ var }} in {{ initial_assignments }}");
+                </script>
+                {% if var in initial_assignments %}
+                    <td class="initial-cell">{{ solution[var] }}</td>
+                {% else %}
+                    <td class="generated-cell">{{ solution[var] }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <hr>
+    <h2>Next Step</h2>
+</body>
+
+</html>
