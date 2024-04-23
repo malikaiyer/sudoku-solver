@@ -40,12 +40,21 @@ td.box-side {
 }
 
 /* to make lines between each 3rd cell bolded */
-td:nth-child(9n) {
+td:nth-child(3n) { /*must be 3n to make the 3rd cell bolded*/
     border-right-width: 3px;
 }
 
 tr:nth-child(3n) td {
     border-bottom-width: 3px;
+}
+
+.backtracked {
+            text-decoration: line-through;
+            color: red; /* Change this color for backtracked values */
+        }
+
+.guessed {
+    color: blue; /* Change this color for guessed values */
 }
     </style>
 </head>
@@ -53,7 +62,6 @@ tr:nth-child(3n) td {
 <body>
     <h2>Current Puzzle State</h2>
     <table>
-        <!-- Render the current state of the puzzle -->
         {% for row in range(9) %}
         <tr>
             {% for col in range(9) %}
@@ -61,14 +69,14 @@ tr:nth-child(3n) td {
                 <script>
                     console.log("Value of 'var':", "{{ var }}");
                 </script>
-                <script>
-                    console.log("Value of 'initial_assignments':", "{{ initial_assignments }}");
-                    console.log("Is '{{ var }}' in 'initial_assignments':", "{{ var }} in {{ initial_assignments }}");
-                </script>
                 {% if var in initial_assignments %}
                     <td class="initial-cell">{{ solution[var] }}</td>
                 {% else %}
-                    <td class="generated-cell">{{ solution[var] }}</td>
+                    {% if var in solution %}
+                        <td class="generated-cell">{{ solution[var][-1] }}</td>
+                    {% else %}
+                        <td class="generated-cell"> </td>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </tr>

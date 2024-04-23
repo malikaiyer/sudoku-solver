@@ -140,82 +140,85 @@ def minimum_remaining_values(CSP, assignments):
 # the order in which it assigned the variables, and the domains of the remaining unassigned variables after each assignment. You can test your code on the small problem you specified in
 # Part 1, as well as the puzzles from the Example Puzzles section below
 def backtracking_search(CSP):
-    assignments = OrderedDict()
+    assignments = {}
     for key, val in CSP[1].items():
         if len(val) == 1:
             assignments[key] = val[0]
-    # print("assignments: ", assignments)
     #make initial puzzle by removing constraints associated with the initial assignments
     AC3(CSP)
-    # print("initial CSP: ", CSP[1])
     order = []
-    backtracks = OrderedDict()
-    backtrack_count = OrderedDict()
-    return backtrack(CSP, assignments, order, backtracks, backtrack_count)
+    return backtrack(CSP, assignments, order)
 
 #select-unassigned-var = minimum-remaining-values, inference = ac3
-def backtrack(CSP, assignments, order, backtracks, backtrack_count):
+def backtrack(CSP, assignments, order):
     if set(assignments.keys()) == set(CSP[0]):
-        return assignments, order, backtracks, backtrack_count
+        return assignments, order
     var = minimum_remaining_values(CSP, assignments)
+    if var not in assignments:
+        assignments[var] = [0] #set it equal to num list
+    if len(CSP[1][var])>1:
+        assignments[var][0] += 1
+    order.append(var)
+    
     for value in CSP[1][var]:
-        # print("value: " , value)
+        # print("var: ", var, " value: ", value)
         CSP2 = [CSP[0], copy.deepcopy(CSP[1]), CSP[2]] #deep copying the domain
-        assignments[var] = value
+        
         # print("assignments: ", assignments)
+        if var not in assignments:
+            assignments[var] = []
+        assignments[var].append(value)  # Append the new value to the list
+
         old_domain = CSP2[1][var]
         CSP2[1][var] = [value]
-        order.append(var)
+
         inferences = AC3(CSP2)
-        # print("ac3=", inferences)
-        # print("CSP2: ", CSP2[1])
         if inferences == True:
-            result = backtrack(CSP2, assignments, order, backtracks, backtrack_count)
-            # print("result: ",result)
+            result = backtrack(CSP2, assignments, order)
             if result != None:
                 return result
-        else:
-            if backtracks.get(var) == None:
-                backtracks[var] = []
-                backtrack_count[var] = 0
-            backtracks[var].append(value)
-            backtrack_count[var] += 1
         CSP2[1][var] = old_domain
-        del assignments[var]
-        order.pop()
+    del assignments[var]
+    order.pop()
     return None
 
 # modify_domains(CSP9x9, puzzle4_9x9)
-# assignments, order, backtracks, backtrack_count = backtracking_search(CSP9x9)
+# assignments, order = backtracking_search(CSP9x9)
 # print("solution: ", assignments)
 # print("-----------------------")
-# print("backtracks: ", backtracks)
-# print("--------------------------")
-# print("backtrack count: ", backtrack_count)
 # # print(backtracking_search(CSP4x4))
 # print("CSP: ", CSP4x4[1])
 
 @app.route('/backtracking_search', methods=['POST'])
 def getting_solution():
     ui_csp = make_csp(request.form)
-    assignments, order, backtracks, backtrack_count = backtracking_search(ui_csp)
+    result = backtracking_search(ui_csp)
     
-    # Generate the step-by-step solution HTML
-    def generate_solution():
-        current_solution = {}
-        initial_solution = []
-        for already_assigned in ui_csp[1]:
-            if len(ui_csp[1][already_assigned]) == 1:
-                current_solution[already_assigned] = ui_csp[1][already_assigned][0]
-                initial_solution.append(already_assigned)
-        print(initial_solution)
-        for var in order:
-            current_solution[var] = assignments[var]
-            with app.app_context():
-                yield render_template('solution.html', puzzle=ui_csp[1], solution=current_solution, initial_assignments=initial_solution)
+    if result is None:
+        error_message = "Error: Unable to find a solution for the Sudoku puzzle."
+        return error_message, 500
+    else:
+        assignments, order  = result
+        print("assignments: ", assignments)
+        print("order: ", order)
+    
+        # Generate the step-by-step solution HTML
+        def generate_solution():
+            current_solution = {}
+            initial_solution = []
+            for already_assigned in ui_csp[1]:
+                if len(ui_csp[1][already_assigned]) == 1:
+                    current_solution[already_assigned] = ui_csp[1][already_assigned][0]
+                    initial_solution.append(already_assigned)
+            print(initial_solution)
+            for var in order:
+                current_solution[var] = assignments[var]
+                # print("var: ", var, " value: ", assignments[var])
+                with app.app_context():
+                    yield render_template('solution.html', solution=current_solution, initial_assignments=initial_solution)
 
-    # Use the generator to stream the HTML content back to the client
-    return Response(generate_solution(), content_type='text/html')
+        # Use the generator to stream the HTML content back to the client
+        return Response(generate_solution(), content_type='text/html')
 
     # #for advanced UI
     # ui_csp = make_csp(request.form)
