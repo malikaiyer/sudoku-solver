@@ -172,8 +172,6 @@ def getting_solution():
         return error_message, 500
     else:
         assignments, order  = result
-        print("assignments: ", assignments)
-        print("order: ", order)
     
         # Generate the step-by-step solution HTML
         def generate_solution():
@@ -183,7 +181,6 @@ def getting_solution():
                 if len(ui_csp[1][already_assigned]) == 1:
                     current_solution[already_assigned] = ui_csp[1][already_assigned][0]
                     initial_solution.append(already_assigned)
-            print(initial_solution)
             for var in order:
                 current_solution[var] = assignments[var]
                 with app.app_context():
