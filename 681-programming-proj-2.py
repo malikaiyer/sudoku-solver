@@ -28,12 +28,6 @@ def make_csp(ui_dict):
     UI_CSP = [var9x9, domain_csp, constraint9x9]
     return UI_CSP
 
-# print(CSP9x9[1])
-# modify_domains(CSP9x9, puzzle1_9x9)
-# print("-------------------------------------------------------------------")
-# print("-------------------------------------------------------------------")
-# print("-------------------------------------------------------------------")
-# print(CSP9x9[1])
 
 #part 2: revise that takes a CSP and the names of two variables as input and modifies the CSP, removing any value in the
 #first variable’s domain where there isn’t a corresponding value in the other variable’s domain that
@@ -65,15 +59,9 @@ def revise(CSP, Cx, Cy):
             revised = True
             removed_from_domain.append(x)
     if revised == True:
-        # print("removed from domain", Cx,  removed_from_domain)
         CSP[1][Cx] = list(set(CSP[1][Cx]) - set(removed_from_domain))
-        # print("CSP: ", CSP[1])
     return revised
 
-# modify_domains(CSP4x4, puzzle1_4x4)
-# print(revise(CSP4x4, 'C12', 'C11'))
-# print(CSP4x4[1])
-# print("-------------------------------------------------------------------")
 
 #helper function that takes in Xi and the CSP and returns the neighbors of Xi
 def get_neighbors(CSP, Xi):
@@ -91,13 +79,11 @@ def get_neighbors(CSP, Xi):
 #use a python deque to implement the queue: https://docs.python.org/3/library/collections.html#collections.deque. appendleft(), pop()
 def AC3(CSP):
     queue = deque((Xi, Xj) for (Xi, Xj) in CSP[2])
-    # print("queue", queue)
     while queue:
         Xi, Xj = queue.pop()
         neighbors = get_neighbors(CSP, Xi)
         result1 = revise(CSP, Xi, Xj)
         result2 = revise(CSP, Xj, Xi)
-        # print("result", result1, result2)
         if result1:
             if len(CSP[1][Xi]) == 0:
                 return False
@@ -110,13 +96,8 @@ def AC3(CSP):
             for n in neighbors - {Xi}:
                 if n not in queue:
                     queue.appendleft((n, Xj))
-        # print("queue", queue)
     return True
 
-# modify_domains(CSP4x4, puzzle1_4x4)
-# print(AC3(CSP4x4))
-# print(CSP4x4[1])
-# print("-------------------------------------------------------------------")
 
 # Write a function minimum-remaining-values that takes a CSP and a set of variable assignments
 # as input, and returns the variable with the fewest values in its domain among the unassigned
@@ -161,10 +142,8 @@ def backtrack(CSP, assignments, order):
     order.append(var)
     
     for value in CSP[1][var]:
-        # print("var: ", var, " value: ", value)
         CSP2 = [CSP[0], copy.deepcopy(CSP[1]), CSP[2]] #deep copying the domain
         
-        # print("assignments: ", assignments)
         if var not in assignments:
             assignments[var] = []
         assignments[var].append(value)  # Append the new value to the list
@@ -182,12 +161,6 @@ def backtrack(CSP, assignments, order):
     order.pop()
     return None
 
-# modify_domains(CSP9x9, puzzle4_9x9)
-# assignments, order = backtracking_search(CSP9x9)
-# print("solution: ", assignments)
-# print("-----------------------")
-# # print(backtracking_search(CSP4x4))
-# print("CSP: ", CSP4x4[1])
 
 @app.route('/backtracking_search', methods=['POST'])
 def getting_solution():
@@ -213,17 +186,11 @@ def getting_solution():
             print(initial_solution)
             for var in order:
                 current_solution[var] = assignments[var]
-                # print("var: ", var, " value: ", assignments[var])
                 with app.app_context():
                     yield render_template('solution.html', solution=current_solution, initial_assignments=initial_solution)
 
         # Use the generator to stream the HTML content back to the client
         return Response(generate_solution(), content_type='text/html')
-
-    # #for advanced UI
-    # ui_csp = make_csp(request.form)
-    # assignments, order, backtracks, backtrack_count = backtracking_search(ui_csp)
-    # return jsonify(assignments)
 
 
 if __name__ == '__main__':
